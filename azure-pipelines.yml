@@ -1,0 +1,42 @@
+# Node.js
+- task: ContainerStructureTest@0
+  inputs:
+  - task: Docker@2
+    inputs:
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      - task: JenkinsDownloadArtifacts@1
+        inputs:
+          jobName: 
+          saveTo: 'jenkinsArtifacts'
+          jenkinsBuild: 'LastSuccessfulBuild'
+          - task: JenkinsQueueJob@2
+            inputs:
+              jobName: 
+              captureConsole: true
+              capturePipeline: true
+              isParameterizedJob: false
+              - task: PublishTestResults@2
+                inputs:
+                  testResultsFormat: 'JUnit'
+                  testResultsFiles: '**/TEST-*.xml'
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
